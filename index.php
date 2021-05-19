@@ -46,6 +46,15 @@
                 </div>
             </div>
 
+            <div class="card m-3" id="tableshow" style="display: none">
+                <div class="card-header">
+                    <p class="h1" id="selectedTableName"></p>
+                </div>
+                <div class="card-body" id="tableContent">
+
+                </div>
+            </div>
+
             <div class="card m-3">
                 <div class="card-header">
                     <p class="h1">
@@ -100,6 +109,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script>
+    // prototype tworzenia tabeli
     let counter = 1;
     $(document).on('click', '#addField', function (){
         let $holder = $('#fieldHolder');
@@ -136,5 +146,52 @@
         $holder.append(prototype);
     })
 </script>
+<script>
+    $(document).on('click', '.show-table', function (){
+        let tablename = $(this).data('tablename');
+
+        let card = $('#tableshow');
+        let name = $('#selectedTableName');
+        let content = $('#tableContent');
+
+        name.html(tablename);
+
+        $.ajax({
+            type: 'post',
+            url: './scripts/select_from.php?tablename=' + tablename
+        }).done((d) => {
+            const respObj = JSON.parse(d)
+
+            let tableHead = `<thead><tr>`;
+
+            for (const respObjKey in respObj[0]) {
+                tableHead += `<th scope="col">${respObjKey}</th>`
+            }
+
+            tableHead += `</tr></thead>`;
+
+            let tableBody = `<tbody>`;
+
+            for (const obj in respObj) {
+                tableBody += `<tr>`;
+                for(const key in respObj[obj])
+                {
+                    tableBody += `<td>` + respObj[obj][key] + `</td>`
+                }
+                tableBody += `</tr>`;
+            }
+
+            tableBody += `</tbody>`
+
+            let table = `<table class="table"> ${tableHead} ${tableBody}</table>`
+
+            content.html(table);
+
+            card.show()
+        })
+
+    })
+</script>
+
 </body>
 </html>

@@ -184,4 +184,22 @@ class Database
             return $e->getMessage();
         }
     }
+
+    public function selectFrom(string $tablename): array| string
+    {
+        $sql = "SELECT *
+            FROM $tablename;";
+
+        try
+        {
+            $result = $this->connection->query($sql);
+            $arr = $result->fetchAll(PDO::FETCH_ASSOC);
+
+            return $arr;
+        }
+        catch (\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+    }
 }

@@ -15,6 +15,7 @@ $tables = $db->listTables();
         <th scope="col">Nazwa tabeli</th>
         <th scope="col">Liczba wierszy</th>
         <th scope="col">Usuń tabelę</th>
+        <th scope="col">Wyświetl tabelę</th>
     </tr>
     </thead>
     <tbody>
@@ -22,7 +23,12 @@ $tables = $db->listTables();
     $sumaWierszy = 0;
     foreach ($tables as $table)
     {
-        echo "<tr><td>$table[0]</td><td>$table[1]</td><td> <a href='./scripts/drop_table.php?name=$table[0]' class='text-danger'>Usuń</a></td></tr>";
+        echo "<tr>";
+        echo "<td>$table[0]</td>";
+        echo "<td>$table[1]</td>";
+        echo "<td> <a href='./scripts/drop_table.php?name=$table[0]' class='text-danger'>Usuń</a></td>";
+        echo "<td> <a href='javascript:void(0)' data-tablename='$table[0]' class='text-success show-table'>Wyświetl tabelę</a> </td>";
+        echo "</tr>";
         $sumaWierszy += $table[1];
     }
     ?>
