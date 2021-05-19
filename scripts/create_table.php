@@ -41,7 +41,7 @@ if (isset($_POST['tablename']) && isset($_POST['fields']))
     if ($result === true)
         header('Location: ../index.php?addtable=1');
     else
-        header('Location: ../index.php?addtable=0&error='.$result);
+        header('Location: ../index.php?addtable=0&error=error');
 
 }
 else

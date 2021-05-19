@@ -105,6 +105,20 @@
 
 </div>
 
+<div class="modal fade" id="addingModal" tabindex="-1" aria-labelledby="addingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addingModalLabel">Wprowadź dane</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -168,26 +182,54 @@
                 tableHead += `<th scope="col">${respObjKey}</th>`
             }
 
-            tableHead += `</tr></thead>`;
+            tableHead += `<th scope="col">Usuń wiersz</th></tr></thead>`;
 
             let tableBody = `<tbody>`;
 
             for (const obj in respObj) {
                 tableBody += `<tr>`;
+                let id = undefined;
                 for(const key in respObj[obj])
                 {
+                    if (key === 'id')
+                        id = respObj[obj][key];
                     tableBody += `<td>` + respObj[obj][key] + `</td>`
                 }
+                tableBody += `<td><a href="./scripts/delete_one.php?tablename=${tablename}&id=${id}" class="text-danger">Usuń</a></td>`;
                 tableBody += `</tr>`;
             }
 
             tableBody += `</tbody>`
 
-            let table = `<table class="table"> ${tableHead} ${tableBody}</table>`
+            let table = `
+            <table class="table">
+                ${tableHead}
+                ${tableBody}
+            </table>
+`
 
             content.html(table);
 
             card.show()
+        })
+
+    })
+</script>
+<script>
+    let addingModal = document.getElementById('addingModal');
+    addingModal.addEventListener('show.bs.modal', function (e) {
+        let source = e.relatedTarget
+        let table = source.getAttribute('data-tablename')
+
+        $.ajax({
+            type: 'get',
+            url: './scripts/get_add_form.php',
+            data: {
+                tablename: table
+            }
+        }).done( (d) => {
+            console.log(d)
+            addingModal.querySelector('.modal-body').innerHTML = d
         })
 
     })

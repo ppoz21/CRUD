@@ -37,7 +37,7 @@ class Database
 
         foreach ($fields as $field)
         {
-            // 0 - name, 1 - type, 3 - nullable?
+            // 0 - name, 1 - type, 2 - nullable?
             $sql .= "$field[0] $field[1] $field[2]";
             if (next($fields) == true) $sql .= ',';
         }
@@ -130,9 +130,9 @@ class Database
         }
     }
 
-    public function deleteOnce( string $tablename, int $id, int $search): bool | string
+    public function deleteOnce( string $tablename, int $id): bool | string
     {
-        $sql = "DELETE FROM $tablename WHRE $id = $search;";
+        $sql = "DELETE FROM $tablename WHERE id = $id;";
 
         try
         {
@@ -185,7 +185,7 @@ class Database
         }
     }
 
-    public function selectFrom(string $tablename): array| string
+    public function selectFrom(string $tablename): array | string
     {
         $sql = "SELECT *
             FROM $tablename;";
@@ -193,9 +193,24 @@ class Database
         try
         {
             $result = $this->connection->query($sql);
-            $arr = $result->fetchAll(PDO::FETCH_ASSOC);
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        }
+        catch (\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+    }
 
-            return $arr;
+    public function getCols(string $tablename): array | string
+    {
+        $sql = "select column_name,data_type 
+                from information_schema.columns 
+                where table_name = '$tablename';";
+
+        try
+        {
+            $result = $this->connection->query($sql);
+            return $result->fetchAll(PDO::FETCH_ASSOC);
         }
         catch (\PDOException $e)
         {

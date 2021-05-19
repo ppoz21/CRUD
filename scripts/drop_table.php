@@ -14,7 +14,7 @@ if (isset($_GET['name']))
     if ($result === true)
         header('Location: ../index.php?droptable=1');
     else
-        header('Location: ../index.php?droptable=0&error='.$result);
+        header('Location: ../index.php?droptable=0&error=error');
 }
 else
     header('Location: ../index.php');

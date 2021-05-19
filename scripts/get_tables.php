@@ -16,6 +16,7 @@ $tables = $db->listTables();
         <th scope="col">Liczba wierszy</th>
         <th scope="col">Usuń tabelę</th>
         <th scope="col">Wyświetl tabelę</th>
+        <th scope="col">Wprowadź dane</th>
     </tr>
     </thead>
     <tbody>
@@ -28,6 +29,7 @@ $tables = $db->listTables();
         echo "<td>$table[1]</td>";
         echo "<td> <a href='./scripts/drop_table.php?name=$table[0]' class='text-danger'>Usuń</a></td>";
         echo "<td> <a href='javascript:void(0)' data-tablename='$table[0]' class='text-success show-table'>Wyświetl tabelę</a> </td>";
+        echo "<td> <a href='javascript:void(0)' data-tablename='$table[0]' class='text-primary' data-bs-toggle='modal' data-bs-target='#addingModal'>Wprowadź dane</a></td>";
         echo "</tr>";
         $sumaWierszy += $table[1];
     }
