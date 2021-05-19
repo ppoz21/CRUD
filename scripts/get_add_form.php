@@ -22,6 +22,8 @@ if (isset($_GET['tablename']))
 EOF;
     foreach ($cols as $col)
     {
+        if ($col["column_name"] == 'id')
+            continue;
         if ($col["data_type"] == 'text')
             echo "<div class='mb-3'><label class='d-flex flex-column'>" . $col["column_name"] . " <textarea class='form-control' name='". $col["column_name"] ."'> </textarea></label></div>";
         else

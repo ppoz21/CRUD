@@ -33,7 +33,7 @@ class Database
 
     public function createTable(string $tablename, array $fields): bool | string
     {
-        $sql = "CREATE TABLE IF NOT EXISTS " . $tablename . "(id int primary key, ";
+        $sql = "CREATE TABLE IF NOT EXISTS " . $tablename . "(id serial primary key, ";
 
         foreach ($fields as $field)
         {
