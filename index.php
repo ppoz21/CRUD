@@ -80,8 +80,8 @@
                                         <label class="d-flex flex-column">
                                             Typ pola
                                             <select name="fields[0][type]" class="form-select">
-                                                <option value="1" selected>int</option>
-                                                <option value="2">varchar(255)</option>
+                                                <option value="0" selected>int</option>
+                                                <option value="1">varchar(255)</option>
                                                 <option value="2">text</option>
                                             </select>
                                         </label>
@@ -119,6 +119,20 @@
     </div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="addingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addingModalLabel">Wprowadź dane</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -139,8 +153,8 @@
                                         <label class="d-flex flex-column">
                                             Typ pola
                                             <select name="fields[{counter}][type]" class="form-select">
-                                                <option value="1" selected>int</option>
-                                                <option value="2">varchar(255)</option>
+                                                <option value="0" selected>int</option>
+                                                <option value="1">varchar(255)</option>
                                                 <option value="2">text</option>
                                             </select>
                                         </label>
@@ -176,39 +190,71 @@
         }).done((d) => {
             const respObj = JSON.parse(d)
 
-            let tableHead = `<thead><tr>`;
+            if (respObj.length !== 0)
+            {
+                let tableHead = `<thead><tr>`;
 
-            for (const respObjKey in respObj[0]) {
-                tableHead += `<th scope="col">${respObjKey}</th>`
-            }
-
-            tableHead += `<th scope="col">Usuń wiersz</th></tr></thead>`;
-
-            let tableBody = `<tbody>`;
-
-            for (const obj in respObj) {
-                tableBody += `<tr>`;
-                let id = undefined;
-                for(const key in respObj[obj])
-                {
-                    if (key === 'id')
-                        id = respObj[obj][key];
-                    tableBody += `<td>` + respObj[obj][key] + `</td>`
+                for (const respObjKey in respObj[0]) {
+                    tableHead += `<th scope="col">${respObjKey}</th>`
                 }
-                tableBody += `<td><a href="./scripts/delete_one.php?tablename=${tablename}&id=${id}" class="text-danger">Usuń</a></td>`;
-                tableBody += `</tr>`;
-            }
 
-            tableBody += `</tbody>`
+                tableHead += `<th scope="col">Edytuj</th>`;
+                tableHead += `<th scope="col">Usuń wiersz</th></tr></thead>`;
 
-            let table = `
-            <table class="table">
+                let tableBody = `<tbody>`;
+
+                for (const obj in respObj) {
+                    tableBody += `<tr>`;
+                    let id = undefined;
+                    for(const key in respObj[obj])
+                    {
+                        if (key === 'id')
+                            id = respObj[obj][key];
+                        tableBody += `<td>` + respObj[obj][key] + `</td>`
+                    }
+                    tableBody += `<td><a href="javascript:void(0)" data-tablename="${tablename}" data-id="${id}" data-bs-toggle='modal' data-bs-target='#editModal' class="text-warning">Edytuj</a></td>`;
+                    tableBody += `<td><a href="./scripts/delete_one.php?tablename=${tablename}&id=${id}" class="text-danger">Usuń</a></td>`;
+                    tableBody += `</tr>`;
+                }
+
+                tableBody += `</tbody>`
+
+                let table = `
+            <table class="table table-striped table-bordered">
                 ${tableHead}
                 ${tableBody}
-            </table>
-`
+            </table>`;
 
-            content.html(table);
+                table += `<hr>
+<form method="get" action="scripts/delete_range.php">
+    <input type="hidden" name="tablename" value="${tablename}">
+    <h1>Usuń wiersze o ID z zakresu</h1>
+    <div class="row my-3">
+        <div class="col">
+            <label class="d-flex flex-column">
+                Minimalne ID
+                <input type="number" class="form-control" name="idmin" placeholder="Minimalne ID" min="1">
+            </label>
+        </div>
+        <div class="col">
+            <label class="d-flex flex-column">
+                Maksymalne ID
+                <input type="number" class="form-control" name="idmax" placeholder="Maksymalne ID" min="1">
+            </label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-warning">Usuń wiersze</button>
+</form>`;
+
+                content.html(table);
+            }
+            else
+            {
+                let table = `<p>Tabela jest pusta</p>`
+                content.html(table);
+            }
+
+
 
             card.show()
         })
@@ -228,10 +274,30 @@
                 tablename: table
             }
         }).done( (d) => {
-            console.log(d)
             addingModal.querySelector('.modal-body').innerHTML = d
         })
 
+    })
+</script>
+
+<script>
+    let editModal = document.getElementById('editModal');
+    editModal.addEventListener('show.bs.modal', function (e) {
+        let source = e.relatedTarget
+        let table = source.getAttribute('data-tablename')
+        let id = source.getAttribute('data-id')
+
+        $.ajax({
+            type: 'get',
+            url: './scripts/get_edit_form.php',
+            data: {
+                tablename: table,
+                id: id
+            }
+        }).done( (d) => {
+            editModal.querySelector('.modal-body').innerHTML = d
+            console.log($(editModal.querySelector('form')))
+        })
     })
 </script>
 

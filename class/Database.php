@@ -90,19 +90,19 @@ class Database
     public function insertInto(string $tablename, array $values): bool | string
     {
         $sql = "INSERT INTO $tablename VALUES (";
+        $sql .= 'default,';
 
-        for ($i = 0; $i < count($values); $i++)
+        foreach ($values as $value)
         {
-            $sql .= $values[$i] . ")";
-            if ($i == (count($values))-1)
-            {
-                $sql .=";";
-            }
+
+            if (is_numeric($value))
+                $sql .= $value;
             else
-            {
-                $sql .= ",(";
-            }
+                $sql .= "'$value'";
+            if (next($values) == true) $sql .= ', ';
         }
+
+        $sql .= ");";
 
         try
         {
@@ -115,9 +115,21 @@ class Database
         }
     }
 
-    public function updateTable( string $tablename, string $rowName, string $value, int $id, int $search): bool | string
+    public function updateTable( string $tablename, array $values, int $id): bool | string
     {
-        $sql = "UPDATE $tablename SET $rowName = $value WHERE $id = $search;";
+        $sql = "UPDATE $tablename SET ";
+
+        foreach ($values as $k => $v)
+        {
+            if (is_numeric($v))
+                $sql .= "$k = $v";
+            else
+                $sql .= "$k = '$v'";
+
+            if (next($values) == true) $sql .= ', ';
+        }
+
+        $sql .= " WHERE id = $id;";
 
         try
         {
@@ -126,7 +138,7 @@ class Database
         }
         catch (\PDOException $e)
         {
-            return $e->getMessage();
+            return $sql;
         }
     }
 
@@ -145,18 +157,9 @@ class Database
         }
     }
 
-
-    public function deleteRange( string $tablename, int $id, array $search): bool | string
+    public function deleteRange(string $tablename, int $min, int $max): bool | string
     {
-        $sql = "DELETE FROM $tablename WHERE $id IN (";
-
-        foreach ($search as $field)
-        {
-            $sql .= "$field";
-            if ( next($search) == true )
-                $sql .= ",";
-        }
-        $sql .= ");";
+        $sql = "DELETE FROM $tablename WHERE id BETWEEN $min AND $max";
 
         try
         {
@@ -189,6 +192,23 @@ class Database
     {
         $sql = "SELECT *
             FROM $tablename;";
+
+        try
+        {
+            $result = $this->connection->query($sql);
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        }
+        catch (\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+    }
+
+    public function selectFromWhereId(string $tablename, int $id): array | string
+    {
+        $sql = "SELECT *
+            FROM $tablename 
+            WHERE id = $id;";
 
         try
         {

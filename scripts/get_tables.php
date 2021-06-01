@@ -9,7 +9,7 @@ $db = new Database();
 $tables = $db->listTables();
 
 ?>
-<table class="table">
+<table class="table table-striped table-bordered">
     <thead>
     <tr>
         <th scope="col">Nazwa tabeli</th>
